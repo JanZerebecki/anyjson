@@ -35,14 +35,15 @@ implementation = None
     methods, as well as the exception they throw. Exception can be either
     an exception class or a string.
 """
-_modules = [("cjson", "encode", "EncodeError", "decode", "DecodeError"),
-            ("yajl", "dumps", TypeError, "loads", ValueError),
+_modules = [("yajl", "dumps", TypeError, "loads", ValueError),
             ("jsonlib2", "write", "WriteError", "read", "ReadError"),
             ("jsonlib", "write", "WriteError", "read", "ReadError"),
             ("simplejson", "dumps", TypeError, "loads", ValueError),
             ("json", "dumps", TypeError, "loads", ValueError),
-            ("django.utils.simplejson", "dumps", TypeError, "loads",
-             ValueError)]
+            ("django.utils.simplejson", "dumps", TypeError, "loads",ValueError),
+            ("cjson", "encode", "EncodeError", "decode", "DecodeError")
+           ]
+
 _fields = ("modname", "encoder", "encerror", "decoder", "decerror")
 
 
