@@ -53,6 +53,10 @@ class _JsonImplementation(object):
     def __init__(self, modspec):
         modinfo = dict(zip(_fields, modspec))
 
+        if modinfo["modname"] == "cjson":
+            import warnings
+            warnings.warn("cjson is deprecated! See http://pypi.python.org/pypi/python-cjson/1.0.5", DeprecationWarning)
+
         # No try block. We want importerror to end up at caller
         module = self._attempt_load(modinfo["modname"])
 
