@@ -12,33 +12,14 @@ __docformat__ = "restructuredtext"
 
 # -eof meta-
 
+#: The json implementation object. This is probably not useful to you,
+#: except to get the name of the implementation in use. The name is
+#: available through ``implementation.name``.
 implementation = None
 
-"""
-.. function:: serialize(obj)
-
-    Serialize the object to JSON.
-
-.. function:: deserialize(str)
-
-    Deserialize JSON-encoded object to a Python object.
-
-.. function:: force_implementation(name)
-
-    Load a specific json module. This is useful for testing and not much else
-
-.. attribute:: implementation
-
-    The json implementation object. This is probably not useful to you,
-    except to get the name of the implementation in use. The name is
-    available through `implementation.name`.
-
-.. data:: _modules
-
-    List of known json modules, and the names of their serialize/unserialize
-    methods, as well as the exception they throw. Exception can be either
-    an exception class or a string.
-"""
+#: List of known json modules, and the names of their loads/dumps
+#: methods, as well as the exceptions they throw.  Exception can be either
+#: an exception class or a string.
 _modules = [("yajl", "dumps", TypeError, "loads", ValueError),
             ("jsonlib2", "write", "WriteError", "read", "ReadError"),
             ("jsonlib", "write", "WriteError", "read", "ReadError"),
@@ -86,21 +67,23 @@ class _JsonImplementation(object):
         __import__(modname)
         return sys.modules[modname]
 
-    def serialize(self, data):
+    def dumps(self, data):
         """Serialize the datastructure to json. Returns a string. Raises
         TypeError if the object could not be serialized."""
         try:
             return self._encode(data)
         except self._encode_error, exc:
             raise TypeError(*exc.args)
+    serialize = dumps
 
-    def deserialize(self, s):
+    def loads(self, s):
         """deserialize the string to python data types. Raises
         ValueError if the string vould not be parsed."""
         try:
             return self._decode(s)
         except self._decode_error, exc:
             raise ValueError(*exc.args)
+    deserialize = loads
 
 
 def force_implementation(modname):
@@ -130,7 +113,14 @@ else:
     else:
         raise ImportError("No supported JSON module found")
 
-    serialize = lambda value: implementation.serialize(value)
-    deserialize = lambda value: implementation.deserialize(value)
-    dumps = serialize
-    loads = deserialize
+
+    def loads(value):
+        """Serialize the object to JSON."""
+        return implementation.loads(value)
+    deserialize = loads   # compat
+
+
+    def dumps(value):
+        """Deserialize JSON-encoded object to a Python object."""
+        return implementation.dumps(value)
+    serialize = dumps
