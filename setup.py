@@ -1,3 +1,4 @@
+import os
 import sys
 
 extra = {}
@@ -13,7 +14,7 @@ except ImportError:
 import re
 re_meta = re.compile(r'__(\w+?)__\s*=\s*(.*)')
 re_vers = re.compile(r'VERSION\s*=\s*\((.*?)\)')
-re_doc = re.compile(r'^"""(.+?)"""')
+re_doc = re.compile(r'^"""(.+?)"""', re.M|re.S)
 rq = lambda s: s.strip("\"'")
 
 def add_default(m):
@@ -27,22 +28,26 @@ def add_version(m):
 
 
 def add_doc(m):
-    return (("doc", m.groups()[0]), )
+    return (("doc", m.groups()[0].replace("\n", " ")), )
 
 pats = {re_meta: add_default,
-        re_vers: add_version,
-        re_doc: add_doc}
+        re_vers: add_version}
 here = os.path.abspath(os.path.dirname(__file__))
 meta_fh = open(os.path.join(here, "anyjson/__init__.py"))
 try:
     meta = {}
+    acc = []
     for line in meta_fh:
         if line.strip() == '# -eof meta-':
             break
+        acc.append(line)
         for pattern, handler in pats.items():
             m = pattern.match(line.strip())
             if m:
                 meta.update(handler(m))
+    m = re_doc.match("".join(acc).strip())
+    if m:
+        meta.update(add_doc(m))
 finally:
     meta_fh.close()
 
