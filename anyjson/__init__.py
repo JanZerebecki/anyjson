@@ -77,7 +77,7 @@ class _JsonImplementation(object):
 
         self.name = modinfo["modname"]
 
-    def __str__(self):
+    def __repr__(self):
         return "<_JsonImplementation instance using %s>" % self.name
 
     def _attempt_load(self, modname):
