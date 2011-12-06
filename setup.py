@@ -52,6 +52,19 @@ finally:
     meta_fh.close()
 
 
+supported = ["yajl", "jsonlib2", "jsonlib", "simplejson",
+             "json", "django.utils.simplejson", "cjson"]
+install_requires = []
+for module in supported:
+    try:
+        __import__(module)
+        break
+    except ImportError:
+        pass
+else:
+    install_requires.append("simplejson")
+
+
 setup(name='anyjson',
       version=meta["VERSION"],
       description=meta["doc"],
@@ -60,6 +73,7 @@ setup(name='anyjson',
       url=meta["homepage"],
       license='BSD',
       long_description=open("README").read(),
+      install_requires=install_requires,
       classifiers=[
             'Development Status :: 5 - Production/Stable',
             'License :: OSI Approved :: BSD License',
