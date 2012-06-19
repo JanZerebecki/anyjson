@@ -85,7 +85,7 @@ class _JsonImplementation(object):
         try:
             return self._encode(data)
         except self._encode_error, exc:
-            raise TypeError(*exc.args)
+            raise TypeError, TypeError(*exc.args), sys.exc_info()[2]
     serialize = dumps
 
     def loads(self, s):
@@ -97,7 +97,7 @@ class _JsonImplementation(object):
                 return self._filedecode(StringIO(s))
             return self._decode(s)
         except self._decode_error, exc:
-            raise ValueError(*exc.args)
+            raise ValueError, ValueError(*exc.args), sys.exc_info()[2]
     deserialize = loads
 
 
