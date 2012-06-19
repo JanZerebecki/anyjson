@@ -17,19 +17,30 @@ __docformat__ = "restructuredtext"
 #: available through ``implementation.name``.
 implementation = None
 
+# json.loads does not support buffer() objects,
+# so we load() and StringIO instead, and it won't copy.
+if sys.version_info[0] == 3:
+    from io import StringIO
+else:
+    try:
+        from cStringIO import StringIO  # noqa
+    except ImportError:
+        from StringIO import StringIO   # noqa
+
 #: List of known json modules, and the names of their loads/dumps
 #: methods, as well as the exceptions they throw.  Exception can be either
 #: an exception class or a string.
-_modules = [("yajl", "dumps", TypeError, "loads", ValueError),
-            ("jsonlib2", "write", "WriteError", "read", "ReadError"),
-            ("jsonlib", "write", "WriteError", "read", "ReadError"),
-            ("simplejson", "dumps", TypeError, "loads", ValueError),
-            ("json", "dumps", TypeError, "loads", ValueError),
-            ("django.utils.simplejson", "dumps", TypeError, "loads",ValueError),
-            ("cjson", "encode", "EncodeError", "decode", "DecodeError")
+_modules = [("yajl", "dumps", TypeError, "loads", ValueError, "load"),
+            ("jsonlib2", "write", "WriteError", "read", "ReadError", None),
+            ("jsonlib", "write", "WriteError", "read", "ReadError", None),
+            ("simplejson", "dumps", TypeError, "loads", ValueError, "load"),
+            ("json", "dumps", TypeError, "loads", ValueError, "load"),
+            ("django.utils.simplejson", "dumps", TypeError, "loads", ValueError, "load"),
+            ("cjson", "encode", "EncodeError", "decode", "DecodeError", None)
            ]
 
-_fields = ("modname", "encoder", "encerror", "decoder", "decerror")
+_fields = ("modname", "encoder", "encerror",
+           "decoder", "decerror", "filedecoder")
 
 
 class _JsonImplementation(object):
@@ -48,6 +59,7 @@ class _JsonImplementation(object):
         self.implementation = modinfo["modname"]
         self._encode = getattr(module, modinfo["encoder"])
         self._decode = getattr(module, modinfo["decoder"])
+        self._filedecode = getattr(module, modinfo["filedecoder"])
         self._encode_error = modinfo["encerror"]
         self._decode_error = modinfo["decerror"]
 
@@ -78,8 +90,11 @@ class _JsonImplementation(object):
 
     def loads(self, s):
         """deserialize the string to python data types. Raises
-        ValueError if the string vould not be parsed."""
+        ValueError if the string could not be parsed."""
+        # uses StringIO to support buffer objects.
         try:
+            if self._filedecode:
+                return self._filedecode(StringIO(s))
             return self._decode(s)
         except self._decode_error, exc:
             raise ValueError(*exc.args)
