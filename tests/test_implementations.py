@@ -46,3 +46,12 @@ def test_exceptions():
         assert_raises(TypeError, anyjson.serialize, [object()])
         assert_raises(ValueError, anyjson.loads, "[")
         assert_raises(ValueError, anyjson.deserialize, "[")
+
+
+def test_json_loads_unicode():
+    try:
+        anyjson.force_implementation("json")
+    except ImportError:
+        return
+
+    assert "foo" in anyjson.loads(u'{"foo": "bar"}')

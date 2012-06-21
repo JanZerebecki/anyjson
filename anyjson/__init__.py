@@ -94,7 +94,7 @@ class _JsonImplementation(object):
         ValueError if the string could not be parsed."""
         # uses StringIO to support buffer objects.
         try:
-            if self._filedecode:
+            if self._filedecode and not isinstance(s, basestring):
                 return self._filedecode(StringIO(s))
             return self._decode(s)
         except self._decode_error, exc:
