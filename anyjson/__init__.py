@@ -59,7 +59,8 @@ class _JsonImplementation(object):
         self.implementation = modinfo["modname"]
         self._encode = getattr(module, modinfo["encoder"])
         self._decode = getattr(module, modinfo["decoder"])
-        self._filedecode = getattr(module, modinfo["filedecoder"])
+        fdec = modinfo["filedecoder"]
+        self._filedecode = fdec and getattr(module, fdec)
         self._encode_error = modinfo["encerror"]
         self._decode_error = modinfo["decerror"]
 
