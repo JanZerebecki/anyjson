@@ -60,3 +60,7 @@
 
  * Added support for buffer objects
  
+0.3.3
+
+ * Fixed bug in buffer object support related to differences between
+   stringIO and cStringIO
